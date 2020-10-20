@@ -20,6 +20,8 @@ GEM
     method_source (0.8.2)
     minitest (5.14.2)
     mustermann (1.0.3)
+    pastel (0.8.0)
+      tty-color (~> 0.5)
     pry (0.10.4)
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
@@ -39,21 +41,36 @@ GEM
       sinatra (>= 1.0)
     slop (3.6.0)
     sqlite3 (1.4.2)
+    strings (0.2.0)
+      strings-ansi (~> 0.2)
+      unicode-display_width (~> 1.5)
+      unicode_utils (~> 1.4)
+    strings-ansi (0.2.0)
     thread_safe (0.3.6)
     tilt (2.0.10)
+    tty-box (0.6.0)
+      pastel (~> 0.8)
+      strings (~> 0.2.0)
+      tty-cursor (~> 0.7)
+    tty-color (0.5.2)
+    tty-cursor (0.7.1)
     tzinfo (1.2.7)
       thread_safe (~> 0.1)
+    unicode-display_width (1.7.0)
+    unicode_utils (1.4.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   activerecord (~> 5.2.1)
+  pastel
   pry
   rake
   require_all
   sinatra-activerecord
   sqlite3
+  tty-box
 
 BUNDLED WITH
    1.17.3

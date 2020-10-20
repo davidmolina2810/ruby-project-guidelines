@@ -8,6 +8,10 @@ class Writer < ActiveRecord::Base
     entries << entry
     entry
   end
+
+  def total_entries # returns total number of entries written by self-writer
+    self.entries.length
+  end
   
   def entry_by_title(title) # find an entry by title written by self-writer
     self.entries.find_by(title: title)

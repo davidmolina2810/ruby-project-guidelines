@@ -10,7 +10,7 @@ class Writer < ActiveRecord::Base
   end
   
   def entry_by_title(title)
-    Entry.find_by(title: title)
+    self.entry.find_by(title: title)
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

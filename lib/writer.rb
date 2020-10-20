@@ -2,15 +2,15 @@ class Writer < ActiveRecord::Base
   has_many :entries
   has_many :journals, through: :entries
 
-  def write_entry(journal, body) # create new entry in journal 
-    entry = Entry.create(body: body)
+  def write_entry(journal, body, title = nil) # create new entry in journal 
+    entry = Entry.create(body: body, title: title)
     journal.entries << entry
     entries << entry
     entry
   end
   
-  def entry_by_title(title)
-    Entry.find_by(title: title)
+  def entry_by_title(title) # find an entry by title written by self-writer
+    self.entries.find_by(title: title)
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal
@@ -29,7 +29,7 @@ class Writer < ActiveRecord::Base
     entry
   end
 
-  def delete_entry(entry)
+  def delete_entry(entry) # delete given entry and return updated list of entries by self-writer
     entry.destroy
     self.entries
   end

@@ -25,8 +25,8 @@ end
 
   
 
-user = determine_user
-welcome(user)
+$user = determine_user
+welcome($user)
 divider
 puts "What would you like to do?"
 first_menu_box
@@ -42,7 +42,7 @@ if choice == 1
   if choice == "Y"
     puts "What subject should this journal be?"
     subject = gets.chomp.capitalize
-    user.create_journal(journal_name, subject)
+    $user.create_journal(journal_name, subject)
   else
     user.create_journal(journal_name)
   end 

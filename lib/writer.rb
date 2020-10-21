@@ -3,15 +3,11 @@ class Writer < ActiveRecord::Base
   has_many :journals, through: :entries
 
   def write_entry(journal, body, title = nil) # create new entry in journal 
-    entry = Entry.create(body: body, title: title)
-    journal.entries << entry
-    self.entries << entry
-    entry
+    Entry.create(body: body, title: title, writer_id: self.id, journal_id: journal.id)
   end
 
   def create_journal(name, subject = nil) # create journal belonging to self-writer
-    j = Journal.create(name: name, subject: subject)
-    self.journals << j
+    Journal.create(name: name, subject: subject)
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

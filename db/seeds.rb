@@ -4,15 +4,18 @@ Writer.destroy_all
 Journal.destroy_all
 Entry.destroy_all
 
-writer1 = Writer.create(username: "David", password: "abc")
-writer2 = Writer.create(username: "Wintana", password: "xyz")
+david = Writer.create(username: "David", password: "abc")
+wintana = Writer.create(username: "Wintana", password: "xyz")
 #writer3 = Writer.create(username: "Steve")
 
-j1 = Journal.create(name: "Journal 1", subject: "First Journal")
-j2 = Journal.create(name: "Journal 2", subject: "Second Journal")
+j1 = david.create_journal("Journal 1", "First journal")
+j2 = wintana.create_journal('Journal 2', "Second Journal")
 
-e1 = Entry.create(title: "Entry1 ", writer_id: writer1.id, journal_id: j1.id, body: 'This is the first entry')
-e2 = Entry.create(title: "Entry 2", writer_id: writer2.id, journal_id: j2.id, body: 'This is the second entry')
+david.write_entry(j1, "This is the first entry in #{j1.name}")
+wintana.write_entry(j2, "This is the first entry in #{j2.name}")
+
+#e1 = Entry.create(title: "Entry1 ", writer_id: writer1.id, journal_id: j1.id, body: 'This is the first entry')
+#e2 = Entry.create(title: "Entry 2", writer_id: writer2.id, journal_id: j2.id, body: 'This is the second entry')
 
 
 #writer1.write_entry(j1, "This is my first entry", "Entry 1")

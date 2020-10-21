@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 source "https://rubygems.org"
 
-gem 'activerecord', '~>6.0.3.1'
+gem 'activerecord', '~>5.2.1'
 gem 'sinatra-activerecord'
 gem 'rake'
 gem 'require_all'
 gem 'sqlite3'
 gem 'pry'
+gem 'tty-box'
+gem 'pastel'

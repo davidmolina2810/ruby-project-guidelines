@@ -2,7 +2,7 @@ class Writer < ActiveRecord::Base
   has_many :entries
   has_many :journals, through: :entries
 
-  def write_entry(journal, body, title = nil) # create new entry in journal 
+  def write_entry(journal, body, title = "Untitled") # create new entry in journal 
     Entry.create(body: body, title: title, writer_id: self.id, journal_id: journal.id)
   end
 

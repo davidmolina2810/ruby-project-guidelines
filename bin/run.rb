@@ -34,18 +34,20 @@ def first_menu
 
 
   elsif choice == 2 # view all journals by this user
-    journal_names = show_journals
+    this_users_journals = show_journals
     choice = prompt_menu_input(view_journals_menu_box) # 1. Open a journal, 2. edit a journal, 3. Delete a journal
 
     if choice == 1 # open a journal
-      journal = select_journal(journal_names)
-      show_entries(journal)
+      journal = select_journal(this_users_journals)
+      entries_in_this_journal = show_entries(journal)
       user_choice = prompt_menu_input(entry_edit_menu_box)
       
       if user_choice == 1 # write an entry
         write_entry(journal)
       elsif user_choice == 2 # view an entry 
-        
+        entry = select_entry(entries_in_this_journal)
+        entry_title_box(entry)
+        entry_body_box(entry)
       elsif user_choice == 3  # edit an entry
         
       elsif user_choice == 4 # delete an entry
@@ -151,43 +153,57 @@ def journal_edit_menu_box
 end
 
 def entry_edit_menu_box
-  box = TTY::Box.frame "1. Write an entry", "2. View an entry", "2. Edit an entry", "4. Delete an entry", align: :left
+  box = TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", align: :left
   print box
 end
 
-def show_journals # show all journals by $user and return list of journal names
+def show_journals # show all journals' names by $user and return journals
+  puts "Here are your journals: "
   divider
-  puts "No.       Title"
-  single_divider
-  journal_names = $user.journals.uniq.map{ |journal| journal.name }
-  for x in (1..journal_names.length) do 
-    puts "#{x}.   #{journal_names[x-1]}"
+  journals = $user.journals.uniq
+  if !journals.empty?
+    puts "No.       Title"
+    puts "---       -----"
+    for x in (1..journals.length) do 
+      puts "#{x}.       #{journals[x-1].name}"
+    end
   end
-  divider
-  journal_names
+  journals
 end
 
-def select_journal(journal_names)
+def select_journal(journals) # get one journal instance
   print "Select a journal number: "
   num = gets.chomp.to_i
   single_divider
-  puts "Opening #{journal_names[num-1]}..."
+  journal = journals[num-1]
+  puts "Opening #{journal.name}..."
   divider
-  journal = $user.journals.find_by(name: journal_names[num-1])
+  journal 
+end
+
+def select_entry(entries) # get one entry instance
+  print "Select an entry number: "
+  num = gets.chomp.to_i
+  single_divider
+  entry = entries[num-1]
+  puts "Opening #{entry.title}..."
+  divider
+  entry
 end
 
 
-def show_entries(journal)
+def show_entries(journal) # show all entries by $user in journal and return entries
   puts "Here are the entries in this journal:"
-  single_divider
+  divider
   entries = journal.entries
   if !entries.empty?
-    puts "Entry No.     Entry Title"
-    divider
+    puts "No.      Title"
+    puts "---      -----"
     for x in (1..entries.length) do 
-      puts "   #{x}.           #{entries[x-1].title}"
+      puts "#{x}.      #{entries[x-1].title}"
     end
   end
+  entries
 end
 
 def create_journal
@@ -255,6 +271,20 @@ def update_journal_subject(journal)
   new_subject = gets.chomp.titleize
   journal.update(subject: new_subject)
 end
+
+def entry_title_box(entry)
+  pastel = Pastel.new
+  puts pastel.decorate("Title", :blue, :bold)
+  box = TTY::Box.frame "#{entry.title}", align: :center 
+  print box
+end
+
+def entry_body_box(entry)
+  pastel = Pastel.new
+  puts pastel.decorate("Body", :blue, :bold)
+  box = TTY::Box.frame "#{entry.body}", align: :center
+  print box 
+end 
 
 divider
 $user = get_user

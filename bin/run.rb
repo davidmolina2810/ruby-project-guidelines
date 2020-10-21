@@ -24,22 +24,91 @@ def welcome(user)
 end
 
 def first_menu 
+  choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
+  puts
+  puts
+  
+  if choice == 1 # create a new journal and associates to $user by creating first entry
 
-  first_menu_box
-  puts "What would you like to do?"  
-  choice = gets.chomp.to_i
-
-  single_divider
-  if choice == 1
-    create_journal
+    create_and_associate_journal
 
 
-  elsif choice == 2
-    journal = open_journal
-    show_entries(journal)
+  elsif choice == 2 # view all journals by this user
+    journal_names = show_journals
+    choice = prompt_menu_input(view_journals_menu_box) # 1. Open a journal, 2. edit a journal, 3. Delete a journal
 
+    if choice == 1 # open a journal
+      journal = select_journal(journal_names)
+      show_entries(journal)
+      user_choice = prompt_menu_input(entry_edit_menu_box)
+      
+      if user_choice == 1 # write an entry
+        write_entry(journal)
+      elsif user_choice == 2 # view an entry 
+        
+      elsif user_choice == 3  # edit an entry
+        
+      elsif user_choice == 4 # delete an entry
+
+      end
+
+
+    elsif choice == 2 # edit a journal
+      journal = select_journal(journal_names)
+      ans = prompt_menu_input(journal_edit_menu_box, "What do you want to change about #{journal.name}?")
+
+      if ans == 1 # change name of journal
+        update_journal_name(journal)
+
+      elsif ans == 2 # change subject of journal
+        update_journal_subject(journal)
+
+      elsif ans == 3 # change both subject and name 
+        update_journal_name(journal)
+        update_journal_subject(journal)
+      end
+      
+    elsif choice == 3 # delete a journal
+      journal = select_journal(journal_names)
+      delete_journal(journal)
+    end
+  
+  elsif choice == 3
+    return
   end
+end
 
+def new_page
+  for x in 1..15
+    puts
+  end
+end
+
+def create_and_associate_journal
+  journal = create_journal
+  divider
+  if !$user.journals.include?(journal) # if new journal has not been associated with $user bc no entry has been made
+    puts "Let's make your first entry in #{journal.name}!"
+    write_entry(journal)
+  end
+  divider
+end
+
+def prompt_menu_input(box, prompt = "What do you want to do?") # prompts user, prints box menu, returns choice as Int
+  puts prompt
+  box
+  print "--> "
+  choice = gets.chomp.to_i
+end
+
+def write_entry(journal)
+  print "Can you think of a title for you entry? (Y/N) "
+  resp = gets.chomp.upcase
+  if resp == "Y"
+    write_entry_with_title(journal)
+  elsif resp == "N"
+    write_entry_without_title(journal)
+  end
 end
 
 def create_writer
@@ -63,31 +132,58 @@ def single_divider
   puts "---------------------------"
 end
 
-def first_menu_box 
-  box = TTY::Box.frame "1. Create new Journal", "2. Open a Journal", "3. Delete Journal", align: :left
+def home_menu_box 
+  box = TTY::Box.frame "1. Create new Journal", "2. View Your Journals", "3. Exit", align: :left
   print box 
+  single_divider
 end
 
-def open_journal
+def view_journals_menu_box
+  box = TTY::Box.frame "1. Open a journal", "2. Edit a journal", "3. Delete a journal", align: :left
+  print box
+  single_divider
+end
+
+def journal_edit_menu_box
+  box = TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", align: :left
+  print box
+  single_divider
+end
+
+def entry_edit_menu_box
+  box = TTY::Box.frame "1. Write an entry", "2. View an entry", "2. Edit an entry", "4. Delete an entry", align: :left
+  print box
+end
+
+def show_journals # show all journals by $user and return list of journal names
+  divider
+  puts "No.       Title"
+  single_divider
   journal_names = $user.journals.uniq.map{ |journal| journal.name }
   for x in (1..journal_names.length) do 
-    puts "#{x}. #{journal_names[x-1]}"
+    puts "#{x}.   #{journal_names[x-1]}"
   end
-  single_divider
+  divider
+  journal_names
+end
+
+def select_journal(journal_names)
   print "Select a journal number: "
   num = gets.chomp.to_i
   single_divider
   puts "Opening #{journal_names[num-1]}..."
   divider
-  puts "Here are the entries in this journal:"
   journal = $user.journals.find_by(name: journal_names[num-1])
 end
 
+
 def show_entries(journal)
+  puts "Here are the entries in this journal:"
+  single_divider
   entries = journal.entries
   if !entries.empty?
     puts "Entry No.     Entry Title"
-    single_divider
+    divider
     for x in (1..entries.length) do 
       puts "   #{x}.           #{entries[x-1].title}"
     end
@@ -96,26 +192,75 @@ end
 
 def create_journal
   puts "What do you want to call this journal?"
+  print "--> "
   journal_name = gets.chomp
   puts "Do you want to add a subject? (Y/N) "
+  print "--> "
   choice = gets.chomp.upcase
   if choice == "Y"
     puts "What subject should this journal be?"
+    print "--> "
     subject = gets.chomp.capitalize
-    $user.create_journal(journal_name, subject)
+    journal = $user.create_journal(journal_name, subject)
     single_divider
     puts "New journal, '#{journal_name}', of subject, '#{subject}', created."
+    journal
   else
-    $user.create_journal(journal_name)
+    journal = $user.create_journal(journal_name)
     single_divider
     puts "New journal, '#{journal_name}', created."
+    journal
   end 
 end
 
+def delete_journal(journal) # delete given journal from db
+  puts "Destroyed journal, #{journal.name}."
+  entries = Entry.all.select{ |entry| entry.journal_id == journal.id }
+  entries.each { |entry| entry.destroy }
+  journal.destroy
+end
 
-$user = get_user
-welcome($user)
+def write_entry_with_title(journal)
+  puts
+  print "Awesome! Enter your entry's title here: "
+  title = gets.chomp.titleize
+  puts "Type your entry below. Hitting enter will end your current writing session and save your entry."
+  puts
+  body = gets.chomp
+  $user.write_entry(journal, body, title)
+end
+
+def write_entry_without_title(journal)
+  puts
+  puts "No worries! Many writers don't put a title on their books until they've written the last page!"
+  puts
+  puts "Let's get started on your entry."
+  single_divider
+  puts "Type your entry below. Hitting enter will end your current writing session and save your entry."
+  puts
+  body = gets.chomp
+  $user.write_entry(journal, body)
+end
+
+def update_journal_name(journal)
+  puts "What do you want the new name to be?"
+  print "--> "
+  new_name = gets.chomp.titleize
+  journal.update(name: new_name)
+end
+
+def update_journal_subject(journal)
+  puts "What do you want the new subject of the journal to be?"
+  print "--> "
+  new_subject = gets.chomp.titleize
+  journal.update(subject: new_subject)
+end
+
 divider
+$user = get_user
+divider
+welcome($user)
+single_divider
 first_menu
 
 

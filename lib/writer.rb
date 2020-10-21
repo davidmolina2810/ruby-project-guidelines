@@ -8,10 +8,10 @@ class Writer < ActiveRecord::Base
 
   def create_journal(name, subject = nil) # create journal belonging to self-writer
     j = Journal.create(name: name, subject: subject)
-    self.journals << j
-    default_entry = self.entries.find{|entry| entry.journal_id == j.id && entry.writer_id == self.id}
-    default_entry.update(title: "Default")
-    default_entry.update(body: "Default")
+    #self.journals << j
+    #default_entry = self.entries.find{|entry| entry.journal_id == j.id && entry.writer_id == self.id}
+    #default_entry.update(title: "Default")
+    #default_entry.update(body: "Default")
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

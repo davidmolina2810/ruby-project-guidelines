@@ -64,6 +64,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 5.2.1)
+  activesupport
   pastel
   pry
   rake

@@ -7,8 +7,13 @@ class Writer < ActiveRecord::Base
   end
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   def create_journal(name, subject = nil) # create journal belonging to self-writer
     j = Journal.create(name: name, subject: subject)
+=======
+  def create_journal(name, creator, subject = nil) # create journal belonging to self-writer
+    j = Journal.create(name: name, creator: self.username, subject: subject)
+>>>>>>> working
 =======
   def create_journal(name, creator, subject = nil) # create journal belonging to self-writer
     j = Journal.create(name: name, creator: self.username, subject: subject)

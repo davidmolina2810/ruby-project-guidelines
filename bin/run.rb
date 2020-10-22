@@ -29,9 +29,7 @@ def first_menu
   puts
   
   if choice == 1 # create a new journal and associates to $user by creating first entry
-
     create_and_associate_journal
-
 
   elsif choice == 2 # view all journals by this user
     this_users_journals = show_journals
@@ -40,22 +38,19 @@ def first_menu
     if choice == 1 # open a journal
       journal = select_journal(this_users_journals)
       entries_in_this_journal = show_entries(journal)
-      user_choice = prompt_menu_input(entries_edit_menu_box)
+      user_choice = prompt_menu_input(entries_edit_menu_box) # 1. Write entry, 2. view entry, 3. edit entry, 4. delete entry
       
       if user_choice == 1 # write an entry
         write_entry(journal)
 
       elsif user_choice == 2 # view an entry 
         entry = select_entry(entries_in_this_journal)
-        entry_title_box(entry)
-        entry_body_box(entry)
+        view_entry(entry)
 
       elsif user_choice == 3  # edit an entry
         entry = select_entry(entries_in_this_journal)
         puts $pastel.magenta("Current Entry")
-        single_divider
         view_entry(entry)
-        divider
         answer = prompt_menu_input(entry_edit_menu_box, "What do you want to change about entry, #{entry.title}?")
 
         if answer == 1 # change entry title only
@@ -72,6 +67,7 @@ def first_menu
 
       elsif user_choice == 4 # delete an entry
         entry = select_entry(entries_in_this_journal)
+        puts "Destroyed entry, #{entry.title}"
         entry.destroy
       end
 
@@ -208,12 +204,12 @@ def select_journal(journals) # get one journal instance
 end
 
 def select_entry(entries) # get one entry instance
-  print "Select an entry number: "
+  puts "Select an entry number: "
+  print "--> "
   num = gets.chomp.to_i
-  single_divider
   entry = entries[num-1]
-  puts "Opening #{entry.title}..."
-  divider
+  puts "Selecting entry, #{entry.title}..."
+  single_divider
   entry
 end
 
@@ -329,8 +325,10 @@ def entry_body_box(entry)
 end 
 
 def view_entry(entry)
+  divider
   entry_title_box(entry)
   entry_body_box(entry)
+  divider
 end
 
 def view_updated_entry(entry)

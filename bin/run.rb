@@ -1,6 +1,25 @@
 require_relative '../config/environment'
 $pastel = Pastel.new
 
+def logo 
+  font = TTY::Font.new(:doom)
+  pastel = Pastel.new
+  puts pastel.magenta.bold("
+  
+                                            ''~ ``
+                                            ( o o )
+                    +------------------.oooO--(_)--Oooo.------------------+")
+                    
+  puts pastel.green.bold(font.write("Journal Explorer"))
+  puts pastel.magenta.bold "
+                                        .oooO                            
+                                        (   )    Oooo.                    
+                    +---------------------\ (----(   )--------------------+
+                                           \_)    ) /
+                                                 (_/ "
+
+end
+
 def get_user # if username not associated with a Writer, return false, else return the Writer instance
   print "Enter your username: "
   username = gets.chomp
@@ -20,7 +39,7 @@ def get_user # if username not associated with a Writer, return false, else retu
 end
 
 def welcome(user)
-  puts $pastel.decorate("Welcome to your Journal Explorer, #{user.username}!", :green, :bold)
+  puts $pastel.decorate("Welcome to your Journal Explorer, #{user.username}!", :green, :bold, :underline)
 end
 
 def first_menu 
@@ -33,7 +52,7 @@ def first_menu
 
   elsif choice == 2 # view all journals by this user
     this_users_journals = show_journals
-    choice = prompt_menu_input(view_journals_menu_box) # 1. Open a journal, 2. edit a journal, 3. Delete a journal
+    choice = prompt_menu_input(view_journals_menu_box) # 1. Open a journal, 2. edit a journal, 3. Delete a journal, 4. Go Back
 
     if choice == 1 # open a journal
       journal = select_journal(this_users_journals)
@@ -41,10 +60,13 @@ def first_menu
       user_choice = prompt_menu_input(entries_edit_menu_box) # 1. Write entry, 2. view entry, 3. edit entry, 4. delete entry
       
       if user_choice == 1 # write an entry
-        write_entry(journal)
+        entry = write_entry(journal)
+        puts $pastel.cyan("Your new entry")
+        view_entry(entry)
 
       elsif user_choice == 2 # view an entry 
         entry = select_entry(entries_in_this_journal)
+        puts $pastel.cyan("Your entry")
         view_entry(entry)
 
       elsif user_choice == 3  # edit an entry
@@ -67,7 +89,7 @@ def first_menu
 
       elsif user_choice == 4 # delete an entry
         entry = select_entry(entries_in_this_journal)
-        puts "Destroyed entry, #{entry.title}"
+        puts $pastel.red("Destroyed entry, #{entry.title}")
         entry.destroy
       end
 
@@ -85,11 +107,16 @@ def first_menu
       elsif ans == 3 # change both subject and name 
         update_journal_name(journal)
         update_journal_subject(journal)
+      elsif ans == 4 # go back to previous menu
+
       end
       
     elsif choice == 3 # delete a journal
       journal = select_journal(this_users_journals)
       delete_journal(journal)
+    
+    elsif choice == 4 # call first_menu to go back to home menu
+      first_menu
     end
   
   elsif choice == 3 # exit program
@@ -113,15 +140,21 @@ def create_and_associate_journal
   divider
 end
 
-def prompt_menu_input(box, prompt = "What do you want to do?") # prompts user, prints box menu, returns choice as Int
-  puts prompt
+def prompt_menu_input(box, prompt = "What do you want to do? ") # prompts user, prints box menu, returns choice as Int
+  single_divider
   box
-  print "--> "
+  puts greenify(prompt)
+  print greenify("--> ")
   choice = gets.chomp.to_i
 end
 
+def greenify(str) # make string green
+  $pastel.green(str)
+end
+
 def write_entry(journal)
-  print "Can you think of a title for you entry? (Y/N) "
+  puts "Can you think of a title for you entry? (Y/N) "
+  print "--> "
   resp = gets.chomp.upcase
   if resp == "Y"
     write_entry_with_title(journal)
@@ -152,30 +185,29 @@ def single_divider
 end
 
 def home_menu_box 
-  box = TTY::Box.frame "1. Create new Journal", "2. View Your Journals", "3. Exit", align: :left
+  box = $pastel.green(TTY::Box.frame "1. Create new Journal", "2. View Your Journals", "3. Exit", align: :left)
   print box 
-  single_divider
 end
 
 def view_journals_menu_box
-  box = TTY::Box.frame "1. Open a journal", "2. Edit a journal", "3. Delete a journal", align: :left
+  box = greenify(TTY::Box.frame "1. Open a journal", "2. Edit a journal", "3. Delete a journal", "4. Go back", align: :left)
   print box
   single_divider
 end
 
 def journal_edit_menu_box
-  box = TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", align: :left
+  box = greenify(TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", "4. Go Back", align: :left)
   print box
   single_divider
 end
 
 def entries_edit_menu_box
-  box = TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", align: :left
+  box = greenify(TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", align: :left)
   print box
 end
 
 def entry_edit_menu_box
-  box = TTY::Box.frame "1. Change title", "2. Change body", "3. Both", align: :left
+  box = greenify(TTY::Box.frame "1. Change title", "2. Change body", "3. Both", align: :left)
   print box
 end
 
@@ -198,7 +230,7 @@ def select_journal(journals) # get one journal instance
   num = gets.chomp.to_i
   single_divider
   journal = journals[num-1]
-  puts "Opening #{journal.name}..."
+  puts $pastel.bright_blue("Opening #{journal.name}...")
   divider
   journal 
 end
@@ -208,7 +240,7 @@ def select_entry(entries) # get one entry instance
   print "--> "
   num = gets.chomp.to_i
   entry = entries[num-1]
-  puts "Selecting entry, #{entry.title}..."
+  puts $pastel.bright_blue("Selecting entry, #{entry.title}...")
   single_divider
   entry
 end
@@ -222,7 +254,7 @@ def show_entries(journal) # show all entries by $user in journal and return entr
     puts "No.      Title"
     puts "---      -----"
     for x in (1..entries.length) do 
-      puts "#{x}.      #{entries[x-1].title}"
+      puts "#{x}.   #{entries[x-1].title}"
     end
   end
   entries
@@ -259,24 +291,29 @@ def delete_journal(journal) # delete given journal from db
 end
 
 def write_entry_with_title(journal)
-  puts
-  print "Awesome! Enter your entry's title here: "
+  single_divider
+  puts "Awesome! Enter your entry's title below "
+  print "--> "
   title = gets.chomp.titleize
   puts "Type your entry below. Hitting enter will end your current writing session and save your entry."
   puts
+  print "--> "
   body = gets.chomp
+  puts
   $user.write_entry(journal, body, title)
 end
 
 def write_entry_without_title(journal)
-  puts
-  puts "No worries! Many writers don't put a title on their books until they've written the last page!"
-  puts
-  puts "Let's get started on your entry."
   single_divider
+  puts "No worries! Many writers don't put a title "
+  puts "on their books until they've written the last page!"
+  puts "Now, let's get started on your entry."
+  divider
   puts "Type your entry below. Hitting enter will end your current writing session and save your entry."
   puts
+  print "--> "
   body = gets.chomp
+  puts
   $user.write_entry(journal, body)
 end
 
@@ -332,17 +369,18 @@ def view_entry(entry)
 end
 
 def view_updated_entry(entry)
-  puts $pastel.red("Your changed Entry")
+  puts $pastel.red("Your updated Entry")
   single_divider
   view_entry(entry)
 end
 
 divider
+logo
 $user = get_user
 divider
 welcome($user)
-single_divider
 first_menu
+
 
 
 

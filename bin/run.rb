@@ -201,7 +201,7 @@ def create_writer
   print pastel.green.bold "Enter a username: "
   username = gets.chomp
   password = prompt.mask pastel.green.bold ("Enter your password:")
-  Writer.create(username: username, password: pass)
+  Writer.create(username: username, password: password)
 end
 
 def get_writer_by_user_and_pass(username, password) # return Writer that matches username and password

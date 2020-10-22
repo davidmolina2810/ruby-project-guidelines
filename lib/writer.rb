@@ -6,8 +6,13 @@ class Writer < ActiveRecord::Base
     Entry.create(body: body, title: title, writer_id: self.id, journal_id: journal.id)
   end
 
+<<<<<<< HEAD
   def create_journal(name, subject = nil) # create journal belonging to self-writer
     j = Journal.create(name: name, subject: subject)
+=======
+  def create_journal(name, creator, subject = nil) # create journal belonging to self-writer
+    j = Journal.create(name: name, creator: self.username, subject: subject)
+>>>>>>> working
     #self.journals << j
     #default_entry = self.entries.find{|entry| entry.journal_id == j.id && entry.writer_id == self.id}
     #default_entry.update(title: "Default")

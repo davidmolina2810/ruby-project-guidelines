@@ -1,30 +1,26 @@
 require_relative '../config/environment'
+require 'pry'
 $pastel = Pastel.new
 
 
 def logo 
   font = TTY::Font.new(:doom)
-  pastel = Pastel.new
-  puts pastel.magenta.bold("
-  
+  puts $pastel.magenta.bold("
                                             ''~ ``
                                             ( o o )
                     +------------------.oooO--(_)--Oooo.------------------+")
-                    
-  puts pastel.green.bold(font.write("Journal Explorer"))
-  puts pastel.magenta.bold"
-                                        .oooO                            
-                                        (   )    Oooo.                    
-                    +---------------------\ (----(   )--------------------+
-                                           \_)    ) /
-                                                 (_/ "
-
+  puts $pastel.green.bold(font.write("Journal Explorer"))
+  puts $pastel.magenta.bold("
+                                       .oooO                            
+                                       (   )    Oooo.                    
+                   +---------------------\ (----(   )--------------------+
+                                          \_)    ) /
+                                                (_/ ")
 end
 
 def get_user # if username not associated with a Writer, return false, else return the Writer instance
-  pastel = Pastel.new
   prompt = TTY::Prompt.new
-  print pastel.green.bold ("Enter your username: ")
+  print $pastel.green.bold ("Enter your username: ")
   username = gets.chomp
   password = prompt.mask pastel.green.bold ("Enter your password:")
   if get_writer_by_user_and_pass(username, password) == nil
@@ -49,9 +45,9 @@ def welcome(user)
 end
 
 def first_menu 
-  choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
-  puts
-  puts
+    choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
+    puts
+    puts
   
   if choice == 1 # create a new journal and associates to $user by creating first entry
     create_and_associate_journal
@@ -201,37 +197,45 @@ def view_journals_menu_box
 end
 
 def journal_edit_menu_box
-  box = TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", align: :left
-  print $pastel.green.bold box
+  box = greenify(TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", "4. Back", align: :left)
+  print box
   single_divider
 end
 
 def entries_edit_menu_box
-  box = TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", align: :left
-  print $pastel.green.bold box
+  box = greenify(TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", 
+  "5. Back", align: :left)
+  print box
 end
 
 def entry_edit_menu_box
-  box = TTY::Box.frame "1. Change title", "2. Change body", "3. Both", align: :left
-  print $pastel.green.bold box
+  box = greenify(TTY::Box.frame "1. Change title", "2. Change body", "3. Both", "4. Back", align: :left)
+  print box
 end
 
 def show_journals # show all journals' names by $user and return journals
-  puts $pastel.yellow.bold "Here are your journals: "
+  puts "Here are your journals: "
   divider
   journals = $user.journals.uniq
-  if !journals.empty?
-    puts $pastel.yellow.bold "No.       Title"
-    puts $pastel.yellow.bold "---       -----"
-    for x in (1..journals.length) do 
-      puts $pastel.yellow.bold "#{x}.       #{journals[x-1].name}"
-    end
-  end
+  journals.each {|journal| journal_box(journal)}
+  #if !journals.empty?
+    #puts "Title".rjust(10) + "Subject".rjust(22)
+    #puts "-----".rjust(10) + "-------".rjust(22)
+    #for x in (1..journals.length) do 
+      #puts "#{x}".ljust(5) + "#{journals[x-1].name}".ljust(20) + "#{journals[x-1].subject}".ljust(18)
+    #end
+  #end
+  divider
   journals
 end
 
+def select_journal_by_name(journals)
+  print "Enter the exact Journal name"
+  print "--> "
+end
+
 def select_journal(journals) # get one journal instance
-  print $pastel.yellow.bold "Select a journal number: "
+  print "Select a journal number: "
   num = gets.chomp.to_i
   page_break
   single_divider
@@ -357,10 +361,16 @@ def entry_title_box(entry)
 end
 
 def entry_body_box(entry)
-  puts $pastel.decorate("Body", :blue, :bold)
-  box = TTY::Box.frame $pastel.green("#{entry.body}"), align: :center
+  label = $pastel.decorate("Body", :blue, :bold)
+  puts label
+  box = TTY::Box.frame $pastel.yellow("#{entry.body}"), align: :center
   print box 
 end 
+
+def journal_box(journal)
+  box = TTY::Box.frame $pastel.decorate(journal.name, :bold)
+  print box
+end
 
 def view_entry(entry)
   divider
@@ -376,7 +386,7 @@ def view_updated_entry(entry)
 end
 
 
-divider
+#divider
 logo
 $user = get_user
 page_break

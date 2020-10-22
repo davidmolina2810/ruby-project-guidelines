@@ -22,7 +22,6 @@ david.write_entry(j2, "This is the second entry in #{j2.name}", "Entry 2")
 
 
 
-
 #writer1.write_entry(j1, "This is my first entry", "Entry 1")
 #writer2.write_entry(j1, "This is the second entry in this journal", "Entry2")
 #writer1.write_entry(j1, "This is the third entry in this journal", "Entry3")

@@ -7,4 +7,8 @@ class Entry < ActiveRecord::Base
     body.scan(/(\w|-)+/).size
   end
 
+  def change_title(new_title)
+    self.title = new_title
+  end
+
 end

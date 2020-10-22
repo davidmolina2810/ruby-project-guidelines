@@ -26,8 +26,7 @@ def get_user # if username not associated with a Writer, return false, else retu
   prompt = TTY::Prompt.new
   print pastel.green.bold ("Enter your username: ")
   username = gets.chomp
-  print pastel.green.bold ("Enter your password:")
-  password = gets.chomp
+  password = prompt.mask pastel.green.bold ("Enter your password:")
   if get_writer_by_user_and_pass(username, password) == nil
     print pastel.green.bold "Hmm... I can't find you. Are you a new writer? (Y/N) "
     choice = gets.chomp.upcase
@@ -41,6 +40,10 @@ def get_user # if username not associated with a Writer, return false, else retu
   end
 end
 
+def page_break
+  puts "\n" * 35
+end
+
 def welcome(user)
   puts $pastel.decorate("Welcome to your Journal Explorer, #{user.username}!", :yellow, :bold)
 end
@@ -52,10 +55,13 @@ def first_menu
   
   if choice == 1 # create a new journal and associates to $user by creating first entry
     create_and_associate_journal
+   
 
   elsif choice == 2 # view all journals by this user
+    page_break
     this_users_journals = show_journals
     choice = prompt_menu_input(view_journals_menu_box) # 1. Open a journal, 2. edit a journal, 3. Delete a journal
+    
 
     if choice == 1 # open a journal
       journal = select_journal(this_users_journals)
@@ -66,10 +72,12 @@ def first_menu
         write_entry(journal)
 
       elsif user_choice == 2 # view an entry 
+        page_break
         entry = select_entry(entries_in_this_journal)
         view_entry(entry)
 
       elsif user_choice == 3  # edit an entry
+        page_break
         entry = select_entry(entries_in_this_journal)
         puts $pastel.magenta("Current Entry")
         view_entry(entry)
@@ -127,9 +135,12 @@ end
 
 def create_and_associate_journal
   journal = create_journal
+  page_break
   divider
   if !$user.journals.include?(journal) # if new journal has not been associated with $user bc no entry has been made
-    puts "Let's make your first entry in #{journal.name}!"
+    puts $pastel.yellow.bold "Let's make your first entry in #{journal.name}!"
+    puts
+    puts
     write_entry(journal)
   end
   divider
@@ -140,12 +151,12 @@ end
 def prompt_menu_input(box, prompt = "What would you like to do?") # prompts user, prints box menu, returns choice as Int
   puts $pastel.yellow.bold prompt
   box
-  print "--> "
+  print $pastel.yellow.bold "--> "
   choice = gets.chomp.to_i
 end
 
 def write_entry(journal)
-  print "Can you think of a title for you entry? (Y/N) "
+  print $pastel.yellow.bold "Can you think of a title for you entry? (Y/N) "
   resp = gets.chomp.upcase
   if resp == "Y"
     write_entry_with_title(journal)
@@ -160,8 +171,7 @@ def create_writer
   puts pastel.red.bold "You are making a new account."
   print pastel.green.bold "Enter a username: "
   username = gets.chomp
-  print prompt.mask pastel.green.bold("Enter a password: ")
-  pass = gets.chomp
+  password = prompt.mask pastel.green.bold ("Enter your password:")
   Writer.create(username: username, password: pass)
 end
 
@@ -170,11 +180,11 @@ def get_writer_by_user_and_pass(username, password) # return Writer that matches
 end
 
 def divider
-  puts $pastel.magenta "==========================="
+  puts $pastel.magenta "========================================================================================================"
 end
 
 def single_divider
-  puts $pastel.magenta "---------------------------"
+  puts $pastel.magenta "--------------------------------------------------------------------------------------------------------"
 end
 
 
@@ -223,6 +233,7 @@ end
 def select_journal(journals) # get one journal instance
   print $pastel.yellow.bold "Select a journal number: "
   num = gets.chomp.to_i
+  page_break
   single_divider
   journal = journals[num-1]
   puts $pastel.yellow.bold "Opening #{journal.name}..."
@@ -296,7 +307,7 @@ def write_entry_with_title(journal)
 end
 
 def write_entry_without_title(journal)
-  puts
+  page_break
   puts $pastel.yellow.bold "No worries! Many writers don't put a title on their books until they've written the last page!"
   puts
   puts $pastel.yellow.bold "Let's get started on your entry."
@@ -368,6 +379,7 @@ end
 divider
 logo
 $user = get_user
+page_break
 divider
 welcome($user)
 single_divider

@@ -1,4 +1,5 @@
 require_relative '../config/environment'
+$pastel = Pastel.new
 
 def get_user # if username not associated with a Writer, return false, else return the Writer instance
   print "Enter your username: "
@@ -19,8 +20,7 @@ def get_user # if username not associated with a Writer, return false, else retu
 end
 
 def welcome(user)
-  pastel = Pastel.new
-  puts pastel.decorate("Welcome to your Journal Explorer, #{user.username}!", :green, :bold)
+  puts $pastel.decorate("Welcome to your Journal Explorer, #{user.username}!", :green, :bold)
 end
 
 def first_menu 
@@ -40,23 +40,44 @@ def first_menu
     if choice == 1 # open a journal
       journal = select_journal(this_users_journals)
       entries_in_this_journal = show_entries(journal)
-      user_choice = prompt_menu_input(entry_edit_menu_box)
+      user_choice = prompt_menu_input(entries_edit_menu_box)
       
       if user_choice == 1 # write an entry
         write_entry(journal)
+
       elsif user_choice == 2 # view an entry 
         entry = select_entry(entries_in_this_journal)
         entry_title_box(entry)
         entry_body_box(entry)
-      elsif user_choice == 3  # edit an entry
-        
-      elsif user_choice == 4 # delete an entry
 
+      elsif user_choice == 3  # edit an entry
+        entry = select_entry(entries_in_this_journal)
+        puts $pastel.magenta("Current Entry")
+        single_divider
+        view_entry(entry)
+        divider
+        answer = prompt_menu_input(entry_edit_menu_box, "What do you want to change about entry, #{entry.title}?")
+
+        if answer == 1 # change entry title only
+          update_entry_title(entry)
+          view_updated_entry(entry)
+        elsif answer == 2 # change entry body only
+          update_entry_body(entry)
+          view_updated_entry(entry)
+        elsif answer == 3 # change entry title and body 
+          update_entry_title(entry)
+          update_entry_body(entry)
+          view_updated_entry(entry)
+        end
+
+      elsif user_choice == 4 # delete an entry
+        entry = select_entry(entries_in_this_journal)
+        entry.destroy
       end
 
 
     elsif choice == 2 # edit a journal
-      journal = select_journal(journal_names)
+      journal = select_journal(this_users_journals)
       ans = prompt_menu_input(journal_edit_menu_box, "What do you want to change about #{journal.name}?")
 
       if ans == 1 # change name of journal
@@ -71,11 +92,11 @@ def first_menu
       end
       
     elsif choice == 3 # delete a journal
-      journal = select_journal(journal_names)
+      journal = select_journal(this_users_journals)
       delete_journal(journal)
     end
   
-  elsif choice == 3
+  elsif choice == 3 # exit program
     return
   end
 end
@@ -152,8 +173,13 @@ def journal_edit_menu_box
   single_divider
 end
 
-def entry_edit_menu_box
+def entries_edit_menu_box
   box = TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", align: :left
+  print box
+end
+
+def entry_edit_menu_box
+  box = TTY::Box.frame "1. Change title", "2. Change body", "3. Both", align: :left
   print box
 end
 
@@ -262,6 +288,7 @@ def update_journal_name(journal)
   puts "What do you want the new name to be?"
   print "--> "
   new_name = gets.chomp.titleize
+  puts
   journal.update(name: new_name)
 end
 
@@ -269,22 +296,48 @@ def update_journal_subject(journal)
   puts "What do you want the new subject of the journal to be?"
   print "--> "
   new_subject = gets.chomp.titleize
+  puts
   journal.update(subject: new_subject)
 end
 
+def update_entry_title(entry)
+  puts "What do you want the new title of this entry to be?"
+  print "--> "
+  new_title = gets.chomp.titleize
+  puts
+  entry.update(title: new_title)
+end
+
+def update_entry_body(entry)
+  puts "Type your new entry below"
+  print "--> "
+  new_body = gets.chomp
+  puts
+  entry.update(body: new_body)
+end
+
 def entry_title_box(entry)
-  pastel = Pastel.new
-  puts pastel.decorate("Title", :blue, :bold)
-  box = TTY::Box.frame "#{entry.title}", align: :center 
+  puts $pastel.decorate("Title", :blue, :bold)
+  box = TTY::Box.frame $pastel.yellow("#{entry.title}"), align: :center
   print box
 end
 
 def entry_body_box(entry)
-  pastel = Pastel.new
-  puts pastel.decorate("Body", :blue, :bold)
-  box = TTY::Box.frame "#{entry.body}", align: :center
+  puts $pastel.decorate("Body", :blue, :bold)
+  box = TTY::Box.frame $pastel.yellow("#{entry.body}"), align: :center
   print box 
 end 
+
+def view_entry(entry)
+  entry_title_box(entry)
+  entry_body_box(entry)
+end
+
+def view_updated_entry(entry)
+  puts $pastel.red("Your changed Entry")
+  single_divider
+  view_entry(entry)
+end
 
 divider
 $user = get_user

@@ -1,5 +1,6 @@
 require_relative '../config/environment'
 require 'readline'
+require 'pry'
 
 $pastel = Pastel.new
 $end_prog = false
@@ -55,6 +56,7 @@ def start_program
   choice = prompt_menu_input(initialize_menu_box, "Choose a number")
   if choice == 1 # login
     $user = get_user
+    welcome($user)
     home_menu
   elsif choice == 2 # quit
     exit_program
@@ -68,13 +70,16 @@ def initialize_menu_box
   print $pastel.green.bold box
 end
 
-def home_menu 
-  page_break
-  welcome($user)
-  choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
+def home_menu(quote = nil) 
+  if !quote
+    page_break
+    choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
+  elsif quote
+    page_break
+    choice = prompt_menu_input(home_menu_box, quote)
+  end
   puts
   puts
-  page_break
   
   if choice == 1 # create a new journal and associates to $user by creating first entry
     create_and_associate_journal
@@ -409,6 +414,7 @@ def delete_journal(journal) # delete given journal from db
   entries = Entry.all.select{ |entry| entry.journal_id == journal.id }
   entries.each { |entry| entry.destroy }
   journal.destroy
+  loop_to_home_menu_box
 end
 
 def write_entry_with_title(journal)
@@ -430,6 +436,7 @@ def write_entry_without_title(journal)
   single_divider
   body = capture_entry_body
   $user.write_entry(journal, body, "(Untitled)")
+  loop_to_home_menu_box
 end
 
 def update_journal_name(journal)
@@ -438,6 +445,7 @@ def update_journal_name(journal)
   new_name = gets.chomp.titleize
   puts
   journal.update(name: new_name)
+  loop_to_home_menu_box
 end
 
 def update_journal_subject(journal)
@@ -446,6 +454,7 @@ def update_journal_subject(journal)
   new_subject = gets.chomp.titleize
   puts
   journal.update(subject: new_subject)
+  loop_to_home_menu_box
 end
 
 def update_entry_title(entry)
@@ -492,14 +501,20 @@ def view_updated_entry(entry)
   view_entry(entry)
 end
 
+def loop_to_home_menu_box
+  quote = "Great! What would you like to do next?" 
+  home_menu(quote) 
+  divider
+end
+
 def run
-  #until $end_prog  
   divider
   logo
   puts
   puts
   start_program
 end
+
 
 run
 

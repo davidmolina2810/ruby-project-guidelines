@@ -1,4 +1,6 @@
 require_relative '../config/environment'
+require 'readline'
+
 $pastel = Pastel.new
 $end_prog = false
 
@@ -32,6 +34,7 @@ def get_user # if username not associated with a Writer, return false, else retu
       return create_writer
     elsif choice == 'N'
       get_user
+    else
     end
   else
     return get_writer_by_user_and_pass(username, password)
@@ -48,7 +51,25 @@ def welcome(user)
   divider
 end
 
+def start_program
+  choice = prompt_menu_input(initialize_menu_box, "Choose a number")
+  if choice == 1 # login
+    $user = get_user
+    home_menu
+  elsif choice == 2 # quit
+    exit_program
+  else
+    incorrect_return_to(start_program) # if 1 or 2 not chosen, call start_program
+  end
+end
+
+def initialize_menu_box
+  box = TTY::Box.frame "1. Login", "2. Quit", align: :left
+  print $pastel.green.bold box
+end
+
 def home_menu 
+  page_break
   welcome($user)
   choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
   puts
@@ -61,13 +82,16 @@ def home_menu
   elsif choice == 2 # view all journals by this user
     journals_menu
     
-  
   elsif choice == 3 # exit program
-    puts "Goodbye.\n\n\n"
-    exit
+    exit_program
   else 
-    incorrect_return_to(home_menu)
+    incorrect_return_to(home_menu) # if 1, 2, or 3 not chosen, call and return to home_menu
   end
+end
+
+def exit_program
+  puts "Goodbye.\n\n\n\n"
+  exit
 end
 
 def journals_menu
@@ -97,6 +121,8 @@ def journals_menu
   elsif choice == 4 # call first_menu to go back to home menu
     page_break
     home_menu
+  elsif choice == 5
+    exit_program
   end
 end
 
@@ -115,6 +141,8 @@ def edit_journals_menu(journal, journals)
   elsif choice == 4 # go back to previous menu
     page_break
     journals_menu
+  elsif choice == 5 # exit program
+    exit_program
   end
 end
 
@@ -144,6 +172,8 @@ def entries_menu(journal)
   elsif choice == 5 # back to previous menu
     page_break
     journals_menu
+  elsif choice == 6. # exit program
+    exit_program
   end
 end
 
@@ -166,6 +196,8 @@ def edit_entries_menu(entry, journal)
   elsif choice == 4 # go back to previous menu
     page_break
     entries_menu(journal)
+  elsif choice == 5 # exit program
+    exit_program
   end
 end
 
@@ -187,7 +219,6 @@ def create_and_associate_journal
     entry = write_entry(journal)
     view_entry(entry)
   end
-  divider
 end
 
 def prompt_menu_input(box, prompt = "What would you like to do?") # prompts user, prints box menu, returns choice as Int
@@ -218,7 +249,7 @@ def create_writer
   puts $pastel.red.bold "You are making a new account."
   print $pastel.green.bold "Enter a username: "
   username = gets.chomp
-  password = $prompt.mask pastel.green.bold ("Enter your password:")
+  password = prompt.mask $pastel.green.bold ("Enter your password:")
   Writer.create(username: username, password: password)
 end
 
@@ -234,6 +265,24 @@ def single_divider
   puts $pastel.magenta "--------------------------------------------------------------------------------------------------------"
 end
 
+def capture_entry_body # keep input open until writer executes CTRL C, returns body with added newlines
+  body = [] # will hold each line of the body
+  divider
+  puts "Write your entry below."
+  puts "Hit enter for new line."
+  puts "To end session, execute CTRL + C."
+  puts
+  prompt = $pastel.yellow.bold "∑==> " # prompt to be output each newline while writing entry
+  begin
+    while buf = Readline.readline(prompt, true) # enter interactive writing session to allow ENTER to create newline in body
+      body << buf # add buf (text input up until ENTER) to array body 
+    end
+  rescue Interrupt # error handler 
+    puts "\nWriting session ended."
+  end
+  divider
+  body = body.join("\n") # return body as string with each line joined by \n 
+end
 
 def home_menu_box 
   box = TTY::Box.frame "1. Create new Journal", "2. View Your Journals", "3. Exit", align: :left
@@ -242,20 +291,20 @@ def home_menu_box
 end
 
 def view_journals_menu_box
-  box = TTY::Box.frame "1. Open a journal", "2. Edit a journal", "3. Delete a journal", "4. Back", align: :left
+  box = TTY::Box.frame "1. Open a journal", "2. Edit a journal", "3. Delete a journal", "4. Back", "5. Exit", align: :left
   print $pastel.green.bold box
   single_divider
 end
 
 def journal_edit_menu_box
-  box = TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", "4. Back", align: :left
+  box = TTY::Box.frame "1. Change journal name", "2. Change journal subject", "3. Both", "4. Back", "5. Exit", align: :left
   print $pastel.green.bold box
   single_divider
 end
 
 def entries_edit_menu_box
   box = TTY::Box.frame "1. Write an entry", "2. View an entry", "3. Edit an entry", "4. Delete an entry", 
-  "5. Back", align: :left
+  "5. Back", "6. Exit", align: :left
   print $pastel.green.bold box
   single_divider
 end
@@ -281,10 +330,10 @@ def show_journals # show all journals' names by $user and return journals
   divider
   journals = $user.journals.uniq
   if !journals.empty?
-    puts $pastel.yellow.bold "No.       Title"
-    puts $pastel.yellow.bold "---       -----"
+    puts $pastel.yellow.bold "Title".center(43)
+    puts $pastel.yellow.bold "-----".center(43)
     for x in (1..journals.length) do 
-      puts $pastel.yellow.bold "#{x}.       #{journals[x-1].name}"
+      puts $pastel.yellow.bold "#{x}." + "#{journals[x-1].name}".center(40)
     end
   end
   journals
@@ -345,11 +394,13 @@ def create_journal
     single_divider
     puts $pastel.yellow.bold "New journal, '#{journal_name}', of subject, '#{subject}', created."
     journal
-  else
+  elsif choice == "N"
     journal = $user.create_journal(journal_name, "(No Subject)")
     single_divider
     puts $pastel.yellow.bold "New journal, '#{journal_name}', created."
     journal
+  else
+    incorrect_return_to(create_journal)
   end 
 end
 
@@ -367,10 +418,7 @@ def write_entry_with_title(journal)
   print $pastel.yellow.bold "--> "
   title = gets.chomp.titleize
   puts
-  puts $pastel.yellow.bold "Type your entry below. Hitting enter will end your current writing session and save your entry."
-  puts
-  print $pastel.yellow.bold "--> "
-  body = gets.chomp
+  body = capture_entry_body
   $user.write_entry(journal, body, title)
 end
 
@@ -380,10 +428,7 @@ def write_entry_without_title(journal)
   puts
   puts $pastel.yellow.bold "Now, let's get started on your entry."
   single_divider
-  puts $pastel.yellow.bold "Type your entry below. Hitting enter will end your current writing session and save your entry."
-  puts
-  print $pastel.yellow.bold "--> "
-  body = gets.chomp
+  body = capture_entry_body
   $user.write_entry(journal, body, "(Untitled)")
 end
 
@@ -412,9 +457,7 @@ def update_entry_title(entry)
 end
 
 def update_entry_body(entry)
-  puts $pastel.yellow.bold "Type your new entry below"
-  print $pastel.yellow.bold "--> "
-  new_body = gets.chomp
+  new_body = capture_entry_body
   puts
   entry.update(body: new_body)
 end
@@ -425,9 +468,10 @@ def entry_title_box(entry)
   print box
 end
 
-def entry_body_box(entry)
+def entry_body_box(entry) # print out the body of an entry in blue inside a white box
+  body = entry.body
   puts $pastel.decorate("Body", :blue, :bold)
-  box = TTY::Box.frame $pastel.green("#{entry.body}"), align: :center
+  box = TTY::Box.frame $pastel.green(body), align: :center
   print box 
 end 
 
@@ -445,17 +489,16 @@ end
 
 def view_updated_entry(entry)
   puts $pastel.red.bold("Your updated Entry")
-  single_divider
   view_entry(entry)
 end
 
 def run
   #until $end_prog  
-    divider
-    logo
-    $user = get_user
-    page_break
-    home_menu
+  divider
+  logo
+  puts
+  puts
+  start_program
 end
 
 run

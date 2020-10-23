@@ -30,8 +30,7 @@ class JournalExplorer
     choice = prompt.yes?("Are you a new writer?")
     if choice  # new user
       return create_writer
-    elsif !choice
-     # user should be in db
+    elsif !choice # user should be in db
       username = prompt.ask($pastel.green.bold "Enter your username: ")
       password = prompt.mask $pastel.green.bold ("Enter your password: ")
       get_writer_by_user_and_pass(username, password)

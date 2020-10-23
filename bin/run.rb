@@ -9,8 +9,8 @@ def logo
                                             ( o o )
                     +------------------.oooO--(_)--Oooo.------------------+")
                     
-  puts pastel.green.bold(font.write("Journal Explorer"))
-  puts pastel.magenta.bold"
+  puts $pastel.green.bold(font.write("Journal Explorer"))
+  puts $pastel.magenta.bold"
                                         .oooO                            
                                         (   )    Oooo.                    
                     +---------------------\ (----(   )--------------------+
@@ -23,9 +23,9 @@ def get_user # if username not associated with a Writer, return false, else retu
   prompt = TTY::Prompt.new
   print $pastel.green.bold ("Enter your username: ")
   username = gets.chomp
-  password = prompt.mask pastel.green.bold ("Enter your password:")
+  password = prompt.mask $pastel.green.bold ("Enter your password:")
   if get_writer_by_user_and_pass(username, password) == nil
-    print pastel.green.bold "Hmm... I can't find you. Are you a new writer? (Y/N) "
+    print $pastel.green.bold "Hmm... I can't find you. Are you a new writer? (Y/N) "
     choice = gets.chomp.upcase
     if choice == 'Y'
       return create_writer
@@ -49,7 +49,7 @@ def home_menu
   choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
   puts
   puts
-  page_break
+
   
   if choice == 1 # create a new journal and associates to $user by creating first entry
     create_and_associate_journal
@@ -338,6 +338,7 @@ def delete_journal(journal) # delete given journal from db
   entries = Entry.all.select{ |entry| entry.journal_id == journal.id }
   entries.each { |entry| entry.destroy }
   journal.destroy
+  loop_to_home_menu_box
 end
 
 def write_entry_with_title(journal)
@@ -365,6 +366,7 @@ def write_entry_without_title(journal)
   print $pastel.yellow.bold "--> "
   body = gets.chomp
   $user.write_entry(journal, body, "(Untitled)")
+  loop_to_home_menu_box
 end
 
 def update_journal_name(journal)
@@ -373,6 +375,7 @@ def update_journal_name(journal)
   new_name = gets.chomp.titleize
   puts
   journal.update(name: new_name)
+  loop_to_home_menu_box
 end
 
 def update_journal_subject(journal)
@@ -381,6 +384,7 @@ def update_journal_subject(journal)
   new_subject = gets.chomp.titleize
   puts
   journal.update(subject: new_subject)
+  loop_to_home_menu_box
 end
 
 def update_entry_title(entry)
@@ -428,6 +432,33 @@ def view_updated_entry(entry)
   single_divider
   view_entry(entry)
 end
+
+def loop_to_home_menu_box
+  this_user_journals = show_journals
+  page_break
+  divider
+  box = TTY::Box.frame "1. Create new Journal", "2. View Your Journals", "3. Exit", align: :left
+  quote = ("Great! What would you like to do next?") # prompts user, prints box menu, returns choice as Int
+  puts $pastel.yellow.bold quote
+  print $pastel.yellow.bold "--> "
+  puts
+  print $pastel.green.bold box 
+  option = gets.chomp.to_i
+  
+
+  if option == 1 # create a new journal and associates to $user by creating first entry
+    create_and_associate_journal
+  
+  elsif option == 2 # view all journals by this user
+    journals_menu
+    
+  
+  elsif option == 3 # exit program
+    return
+  end
+end
+
+
 
 divider
 logo

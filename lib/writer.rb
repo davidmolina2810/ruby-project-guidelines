@@ -6,22 +6,18 @@ class Writer < ActiveRecord::Base
     Entry.create(body: body, title: title, writer_id: self.id, journal_id: journal.id)
   end
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-  def create_journal(name, subject = nil) # create journal belonging to self-writer
-    j = Journal.create(name: name, subject: subject)
-=======
+#<<<<<<< HEAD
+#<<<<<<< HEAD
+  #def create_journal(name, subject = nil) # create journal belonging to self-writer
+    #j = Journal.create(name: name, subject: subject)
+ # end
+#=======
+
+ #end
+#>>>>>>> working
+#=======
   def create_journal(name, creator, subject = nil) # create journal belonging to self-writer
-    j = Journal.create(name: name, creator: self.username, subject: subject)
->>>>>>> working
-=======
-  def create_journal(name, creator, subject = nil) # create journal belonging to self-writer
-    j = Journal.create(name: name, creator: self.username, subject: subject)
->>>>>>> working
-    #self.journals << j
-    #default_entry = self.entries.find{|entry| entry.journal_id == j.id && entry.writer_id == self.id}
-    #default_entry.update(title: "Default")
-    #default_entry.update(body: "Default")
+   j = Journal.create(name: name, creator: self.username, subject: subject)
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

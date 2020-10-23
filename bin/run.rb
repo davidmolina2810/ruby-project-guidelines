@@ -1,17 +1,17 @@
 require_relative '../config/environment'
 $pastel = Pastel.new
+$end_prog = false
 
 def logo 
   font = TTY::Font.new(:doom)
-  pastel = Pastel.new
-  puts pastel.magenta.bold("
+  puts $pastel.magenta.bold("
   
                                             ''~ ``
                                             ( o o )
                     +------------------.oooO--(_)--Oooo.------------------+")
                     
-  puts pastel.green.bold(font.write("Journal Explorer"))
-  puts pastel.magenta.bold"
+  puts $pastel.green.bold(font.write("Journal Explorer"))
+  puts $pastel.magenta.bold"
                                         .oooO                            
                                         (   )    Oooo.                    
                     +---------------------\ (----(   )--------------------+
@@ -21,13 +21,12 @@ def logo
 end
 
 def get_user # if username not associated with a Writer, return false, else return the Writer instance
-  pastel = Pastel.new
   prompt = TTY::Prompt.new
-  print pastel.green.bold ("Enter your username: ")
+  print $pastel.green.bold ("Enter your username: ")
   username = gets.chomp
-  password = prompt.mask pastel.green.bold ("Enter your password:")
+  password = prompt.mask $pastel.green.bold ("Enter your password:")
   if get_writer_by_user_and_pass(username, password) == nil
-    print pastel.green.bold "Hmm... I can't find you. Are you a new writer? (Y/N) "
+    print $pastel.green.bold "Hmm... I can't find you. Are you a new writer? (Y/N) "
     choice = gets.chomp.upcase
     if choice == 'Y'
       return create_writer
@@ -44,10 +43,13 @@ def page_break
 end
 
 def welcome(user)
+  divider
   puts $pastel.decorate("Welcome to your Journal Explorer, #{user.username}!", :yellow, :bold)
+  divider
 end
 
 def home_menu 
+  welcome($user)
   choice = prompt_menu_input(home_menu_box) # 1. Create Journal, 2. View your Journals, 3. Exit
   puts
   puts
@@ -61,7 +63,10 @@ def home_menu
     
   
   elsif choice == 3 # exit program
-    return
+    puts "Goodbye.\n\n\n"
+    exit
+  else 
+    incorrect_return_to(home_menu)
   end
 end
 
@@ -90,6 +95,7 @@ def journals_menu
     delete_journal(journal)
   
   elsif choice == 4 # call first_menu to go back to home menu
+    page_break
     home_menu
   end
 end
@@ -107,6 +113,7 @@ def edit_journals_menu(journal, journals)
     update_journal_name(journal)
     update_journal_subject(journal)
   elsif choice == 4 # go back to previous menu
+    page_break
     journals_menu
   end
 end
@@ -127,8 +134,6 @@ def entries_menu(journal)
 
   elsif choice == 3  # edit an entry
     entry = select_entry(entries_in_this_journal)
-    #choice = prompt_menu_input(entry_edit_menu_box, "What do you want to change about entry, #{entry.title}?")
-
     edit_entries_menu(entry, journal)
     
 
@@ -137,6 +142,7 @@ def entries_menu(journal)
     puts $pastel.red("Destroyed entry, #{entry.title}")
     entry.destroy
   elsif choice == 5 # back to previous menu
+    page_break
     journals_menu
   end
 end
@@ -158,8 +164,16 @@ def edit_entries_menu(entry, journal)
     view_updated_entry(entry)
   
   elsif choice == 4 # go back to previous menu
+    page_break
     entries_menu(journal)
   end
+end
+
+def incorrect_return_to(method)
+  single_divider
+  puts $pastel.red "Incorrect input. Try again."
+  single_divider
+  method
 end
 
 def create_and_associate_journal
@@ -170,7 +184,7 @@ def create_and_associate_journal
     puts $pastel.yellow.bold "Let's make your first entry in #{journal.name}!"
     puts
     puts
-    write_entry(journal)
+    entry = write_entry(journal)
     view_entry(entry)
   end
   divider
@@ -191,16 +205,20 @@ def write_entry(journal)
     write_entry_with_title(journal)
   elsif resp == "N"
     write_entry_without_title(journal)
+  else
+    single_divider
+    puts $pastel.red "Incorrect input. Try again."
+    single_divider
+    write_entry(journal)
   end
 end
 
 def create_writer
-  pastel = Pastel.new 
   prompt = TTY::Prompt.new
-  puts pastel.red.bold "You are making a new account."
-  print pastel.green.bold "Enter a username: "
+  puts $pastel.red.bold "You are making a new account."
+  print $pastel.green.bold "Enter a username: "
   username = gets.chomp
-  password = prompt.mask pastel.green.bold ("Enter your password:")
+  password = $prompt.mask pastel.green.bold ("Enter your password:")
   Writer.create(username: username, password: password)
 end
 
@@ -431,14 +449,16 @@ def view_updated_entry(entry)
   view_entry(entry)
 end
 
-divider
-logo
-$user = get_user
-page_break
-divider
-welcome($user)
-home_menu
+def run
+  #until $end_prog  
+    divider
+    logo
+    $user = get_user
+    page_break
+    home_menu
+end
 
+run
 
 
 

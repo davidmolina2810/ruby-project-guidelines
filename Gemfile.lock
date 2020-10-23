@@ -31,6 +31,7 @@ GEM
       rack
     rake (13.0.1)
     require_all (3.0.0)
+    ruby-progressbar (1.10.1)
     ruby2_keywords (0.0.2)
     sinatra (2.1.0)
       mustermann (~> 1.0)
@@ -82,6 +83,7 @@ DEPENDENCIES
   pry
   rake
   require_all
+  ruby-progressbar
   sinatra-activerecord
   sqlite3
   tty-box

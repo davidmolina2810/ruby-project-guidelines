@@ -7,7 +7,7 @@ class Writer < ActiveRecord::Base
   end
 
   def create_journal(name) # create journal belonging to self-writer
-   j = Journal.create(name: name, creator: self.username)
+    j = Journal.create(name: name, creator: self.username)
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

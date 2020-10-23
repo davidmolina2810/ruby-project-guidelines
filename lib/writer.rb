@@ -2,22 +2,12 @@ class Writer < ActiveRecord::Base
   has_many :entries
   has_many :journals, through: :entries
 
-  def write_entry(journal, body, title = "Untitled") # create new entry in journal 
+  def write_entry(journal, body, title = "(Untitled)") # create new entry in journal 
     Entry.create(body: body, title: title, writer_id: self.id, journal_id: journal.id)
   end
 
-#<<<<<<< HEAD
-#<<<<<<< HEAD
-  #def create_journal(name, subject = nil) # create journal belonging to self-writer
-    #j = Journal.create(name: name, subject: subject)
- # end
-#=======
-
- #end
-#>>>>>>> working
-#=======
-  def create_journal(name, creator, subject = nil) # create journal belonging to self-writer
-   j = Journal.create(name: name, creator: self.username, subject: subject)
+  def create_journal(name) # create journal belonging to self-writer
+   j = Journal.create(name: name, creator: self.username)
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

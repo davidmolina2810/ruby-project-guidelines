@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_22_182119) do
+ActiveRecord::Schema.define(version: 2020_10_23_065012) do
 
   create_table "entries", force: :cascade do |t|
     t.string "title"
@@ -23,7 +23,6 @@ ActiveRecord::Schema.define(version: 2020_10_22_182119) do
 
   create_table "journals", force: :cascade do |t|
     t.string "name"
-    t.string "subject"
     t.string "creator"
   end
 

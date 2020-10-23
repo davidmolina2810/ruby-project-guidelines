@@ -370,7 +370,7 @@ class JournalExplorer
       puts $pastel.yellow.bold("-----".center(40) + "----------".center(20))
       for x in (1..entries.length) do 
         entry = entries[x-1]
-        puts $pastel.yellow.bold("#{x}." + "#{entry.title}".center(36) + "#{entry.word_count}".center(21))
+        puts $pastel.yellow.bold("#{x}." + "#{entry.title}".center(36) + "#{entry.word_count}".center(24))
       end
     else
       puts $pastel.yellow.bold "You haven't written any entries yet."

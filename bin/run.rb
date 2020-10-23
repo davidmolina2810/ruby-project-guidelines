@@ -30,7 +30,8 @@ class JournalExplorer
     choice = prompt.yes?("Are you a new writer?")
     if choice  # new user
       return create_writer
-    elsif !choice # user should be in db
+    elsif !choice
+     # user should be in db
       username = prompt.ask($pastel.green.bold "Enter your username: ")
       password = prompt.mask $pastel.green.bold ("Enter your password: ")
       get_writer_by_user_and_pass(username, password)
@@ -52,6 +53,7 @@ class JournalExplorer
     choice = prompt_menu_input(choices, "Welcome! What would you like to do?")
     if choice == "Login" # login
       $user = get_user
+      binding.pry
       progress_bar("Logging in")
       welcome($user)
       home_menu
@@ -285,7 +287,9 @@ class JournalExplorer
   end
 
   def get_writer_by_user_and_pass(username, password) # return Writer that matches username and password
-    Writer.find_by(username: username, password: password)
+    writer = Writer.find_by(username: username, password: password)
+    writer
+    binding.pry
   end
 
   def divider
@@ -321,7 +325,7 @@ class JournalExplorer
     puts $pastel.yellow.bold "Here are your journals: "
     divider
     journals = $user.journals.uniq
-    #binding.pry
+    binding.pry
     if !journals.empty?
       puts $pastel.yellow.bold "Title".center(43)
       puts $pastel.yellow.bold "-----".center(43)
@@ -484,7 +488,7 @@ class JournalExplorer
 
   def loop_to_home_menu_box # with a different prompt
     choices = %w(Continue Exit)
-    self.reload
+    $user = Writer.find_by(username:$user.username, password:$user.password)
     choice = prompt_menu_input(choices, "Continue or Exit program?")
     if choice == "Continue" || choice == "continue"
       quote = "Great! What would you like to do next?"

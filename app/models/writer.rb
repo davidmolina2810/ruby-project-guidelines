@@ -8,6 +8,8 @@ class Writer < ActiveRecord::Base
 
   def create_journal(name) # create journal belonging to self-writer
     j = Journal.create(name: name, creator: self.username)
+    #self.journals <<  j
+    #j
   end
 
   def update_entry(entry, journal, new_body = nil, new_title = nil) # update given entry in journal

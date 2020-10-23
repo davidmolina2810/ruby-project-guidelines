@@ -27,7 +27,7 @@ class JournalExplorer
 
   def get_user # if username not associated with a Writer, return false, else return the Writer instance
     prompt = TTY::Prompt.new
-    choice = prompt.yes?("Are you a new writer?")
+    choice = prompt.yes?("Are you new to JournalExplorer?")
     if choice  # new user
       return create_writer
     elsif !choice # user should be in db
@@ -65,7 +65,7 @@ class JournalExplorer
   def home_menu(quote = nil) 
     choices = ["Create Journal", "View your Journals", "Exit"]
     if !quote
-      page_break
+      #page_break
       choice = prompt_menu_input(choices) # 1. Create Journal, 2. View your Journals, 3. Exit
     elsif quote
       page_break
@@ -102,14 +102,16 @@ class JournalExplorer
     if !redify 
       bar = ProgressBar.create(:title => $pastel.bright_cyan.bold(action), :total => nil, :length => 50, :unknown_progress_animation_steps => ['==>', '>==', '=>='], :throttle_rate => 0.1)
       50.times { bar.increment; sleep(0.03) }
-      page_break
+      puts
+      #page_break
       if affirm
         puts $pastel.bright_cyan.bold(affirm)
       end
     elsif redify && affirm
       bar = ProgressBar.create(:title => $pastel.red.bold(action), :total => nil, :length => 50, :unknown_progress_animation_steps => ['==>', '>==', '=>='], :throttle_rate => 0.1)
       50.times { bar.increment; sleep(0.03) }
-      page_break
+      puts
+      #page_break
       puts $pastel.red.bold(affirm)
     end
     puts
@@ -187,7 +189,8 @@ class JournalExplorer
     
     elsif choice == "Delete entry" # delete an entry
       entry = select_entry(entries_in_this_journal)
-      puts $pastel.red("Destroyed entry, #{entry.title}")
+      puts
+      progress_bar("Destroying entry '#{entry.title}'", true, "Entry destroyed.")
       entry.destroy
       loop_to_home_menu_box
 
@@ -245,8 +248,7 @@ class JournalExplorer
       puts
       entry = write_entry(journal)
       view_entry(entry)
-      home_menu
-      #loop_to_home_menu_box
+      loop_to_home_menu_box
     end
   end
 
@@ -313,6 +315,7 @@ class JournalExplorer
   end
 
   def show_journals # show all journals' names by $user and return journals
+    prompt = TTY::Prompt.new
     puts
     puts $pastel.yellow.bold "Here are your journals: "
     divider
@@ -323,7 +326,17 @@ class JournalExplorer
       for x in (1..journals.length) do 
         puts $pastel.yellow.bold "#{x}.".ljust(4) + "#{journals[x-1].name}".center(40)
       end
+    else
+      puts
+      puts "You don't have any journals yet."
+      choice = prompt.yes?("Would you like to make one?")
+      if choice 
+        create_and_associate_journal
+      elsif !choice
+        loop_to_home_menu_box
+      end
     end
+    divider
     journals
   end
 
@@ -338,7 +351,6 @@ class JournalExplorer
     journal 
   end
 
-
   def select_entry(entries) # get one entry instance
     puts $pastel.yellow.bold "Select an entry number: "
     print $pastel.yellow.bold "--> "
@@ -347,7 +359,6 @@ class JournalExplorer
     progress_bar("Fetching your entry:")
     entry
   end
-
 
   def show_entries(journal) # show all entries by $user in journal and return entries
     puts
@@ -366,10 +377,11 @@ class JournalExplorer
       prompt = TTY::Prompt.new
       choice = prompt.yes?("Would you like to write one?").upcase
 
-      if choice == "Y"
+      if choice
         write_entry(journal)
-      elsif choice == "N"
+      elsif !choice
         puts "Okay. No problem."
+        loop_to_home_menu_box
       else
         incorrect_return_to(show_entries(journal))
       end
@@ -409,6 +421,7 @@ class JournalExplorer
   end
 
   def write_entry_with_title(journal)
+    page_break
     single_divider
     puts
     print $pastel.yellow.bold "Awesome! Enter your entry's title here: "
@@ -421,6 +434,7 @@ class JournalExplorer
 
   def write_entry_without_title(journal)
     page_break
+    single_divider
     puts $pastel.yellow.bold "No worries! Many writers don't put a title on their books until they've written the last page!"
     puts
     puts $pastel.yellow.bold "Now, let's get started on your entry."
@@ -436,7 +450,6 @@ class JournalExplorer
     journal.update(name: new_name)
     loop_to_home_menu_box
   end
-
 
   def update_entry_title(entry)
     puts $pastel.yellow.bold "What would you like the new title of this entry to be?"
@@ -477,16 +490,16 @@ class JournalExplorer
     view_entry(entry)
   end
 
-  def loop_to_home_menu_box # with a different prompt
-    choices = %w(Continue Exit)
-    $user = Writer.find_by(username:$user.username, password:$user.password)
-    choice = prompt_menu_input(choices, "Continue or Exit program?")
-    if choice == "Continue" || choice == "continue"
-      quote = "Great! What would you like to do next?"
-      progress_bar("Returning to Home menu", false, quote)
+  def loop_to_home_menu_box 
+    choices = %w(Return Exit)
+    $user = Writer.find_by(username:$user.username, password:$user.password) # reload user data
+    choice = prompt_menu_input(choices, "Return to home or Exit program?")
+    if choice == "Return" 
+      progress_bar("Returning to Home menu", false, nil)
+      page_break
       home_menu 
       divider
-    elsif choice == "Exit" || choice == "exit"
+    elsif choice == "Exit" 
       exit_program
     else
       incorrect_return_to(loop_to_home_menu_box)

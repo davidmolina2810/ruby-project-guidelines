@@ -5,6 +5,7 @@ Journal.destroy_all
 Entry.destroy_all
 
 david = Writer.create(username: "David", password: "dam")
+wintana = Writer.create(username: "Wintana", password: "gb")
 #wintana = Writer.create(username: "Wintana", password: "xyz")
 #writer3 = Writer.create(username: "Steve")
 

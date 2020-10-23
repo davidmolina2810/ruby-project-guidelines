@@ -485,7 +485,7 @@ def run
   puts
   start_program
 end
-
+#need to log that i removed subject column from journals
 
 run
 

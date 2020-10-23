@@ -91,8 +91,21 @@ def home_menu(quote = nil)
   end
 end
 
+def animation
+  3.times do #however many times you want it to go for
+  i = 1
+    while i < 9
+      print ("\033[2J")     
+       File.foreach("animation1.rb/#{i}.rb") { |f| puts f }
+      sleep(0.05) #how long it is displayed for
+      i += 1
+    end
+  end
+end
+
 def exit_program # end program
   puts "Goodbye.\n\n\n\n"
+  animation
   exit
 end
 
@@ -478,6 +491,8 @@ def loop_to_home_menu_box # with a different prompt
     incorrect_return_to(loop_to_home_menu_box)
   end
 end
+
+
 
 def run
   logo

@@ -32,8 +32,8 @@ class JournalExplorer
       return create_writer
     elsif !choice # user should be in db
       username = prompt.ask($pastel.green.bold "Enter your username: ")
-      password = prompt.mask $pastel.green.bold ("Enter your password: ")
-      get_writer_by_user_and_pass(username, password)
+      password = prompt.mask($pastel.green.bold "Enter your password: ")
+      user = Writer.find_by(username: username, password: password)
     end
   end
 
@@ -52,7 +52,6 @@ class JournalExplorer
     choice = prompt_menu_input(choices, "Welcome! What would you like to do?")
     if choice == "Login" # login
       $user = get_user
-      binding.pry
       progress_bar("Logging in")
       welcome($user)
       home_menu
@@ -285,12 +284,6 @@ class JournalExplorer
     Writer.create(username: username, password: password)
   end
 
-  def get_writer_by_user_and_pass(username, password) # return Writer that matches username and password
-    writer = Writer.find_by(username: username, password: password)
-    writer
-    binding.pry
-  end
-
   def divider
     puts $pastel.magenta "========================================================================================================"
   end
@@ -324,12 +317,11 @@ class JournalExplorer
     puts $pastel.yellow.bold "Here are your journals: "
     divider
     journals = $user.journals.uniq
-    binding.pry
     if !journals.empty?
-      puts $pastel.yellow.bold "Title".center(43)
-      puts $pastel.yellow.bold "-----".center(43)
+      puts $pastel.yellow.bold "Title".center(47)
+      puts $pastel.yellow.bold "-----".center(47)
       for x in (1..journals.length) do 
-        puts $pastel.yellow.bold "#{x}." + "#{journals[x-1].name}".center(40)
+        puts $pastel.yellow.bold "#{x}.".ljust(4) + "#{journals[x-1].name}".center(40)
       end
     end
     journals
@@ -501,22 +493,15 @@ class JournalExplorer
     end
   end
 
-  def reload
-    prompt = TTY::Prompt.new
-    prompt.yes?("Reload?")
-  end
-
-
   def initialize
     logo
     puts
     puts
+    start_program
   end
 end
 
 journalexplorer = JournalExplorer.new
-until journalexplorer.reload
-  journalexplorer.start_program
-end
+
 
 
